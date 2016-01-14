@@ -31,7 +31,7 @@ The following **additional** features are implemented:
 
 Here's a walkthrough of implemented user stories:
 
-<img src='blob:https%3A//drive.google.com/7ea28359-692f-4991-a8a1-f402b8177144' title='Video Walkthrough' width='' alt='Video Walkthrough' />
+<img src='https://github.com/chunmingcao/SimpleTodo/blob/master/todolist.gif' width='' alt='Video Walkthrough' />
 
 GIF created with [LiceCap](http://www.cockos.com/licecap/).
 
