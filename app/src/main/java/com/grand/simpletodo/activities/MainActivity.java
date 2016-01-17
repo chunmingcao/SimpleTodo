@@ -1,27 +1,27 @@
-package com.grand.simpletodo;
+package com.grand.simpletodo.activities;
 
-import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.app.ShareCompat;
+import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.EditText;
 import android.widget.ListView;
 
-import org.apache.commons.io.FileUtils;
+import com.activeandroid.query.Select;
+import com.grand.simpletodo.fragments.EditItemDialog;
+import com.grand.simpletodo.R;
+import com.grand.simpletodo.adapters.TodoAdapter;
+import com.grand.simpletodo.modules.TodoItem;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
+import java.util.List;
 
 
-public class MainActivity extends AppCompatActivity {
-    ArrayList<String> items;
-    ArrayAdapter<String> itemsAdapter;
+public class MainActivity extends AppCompatActivity implements EditItemDialog.OnSaveItemListener {
+    List<TodoItem> items;
+    ArrayAdapter<TodoItem> itemsAdapter;
     ListView lvItems;
     private int REQUEST_CODE_EDIT_ITEM = 10;
 
@@ -32,10 +32,8 @@ public class MainActivity extends AppCompatActivity {
 
         lvItems = (ListView)findViewById(R.id.lvItems);
         readItems();
-        itemsAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, items);
+        itemsAdapter = new TodoAdapter(this, R.layout.todo_list_item, items);
         lvItems.setAdapter(itemsAdapter);
-        //items.add("First Item");
-        //items.add("Second Item");
         setupListViewListener();
     }
 
@@ -43,31 +41,19 @@ public class MainActivity extends AppCompatActivity {
         lvItems.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
             public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+                TodoItem item = items.get(position);
+                item.delete();
                 items.remove(position);
                 itemsAdapter.notifyDataSetChanged();
-                writeItems();
                 return true;
             }
         });
         lvItems.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Intent editItemIntent = new Intent(MainActivity.this, EditItemActivity.class);
-                editItemIntent.putExtra(EditItemActivity.PARAM_ITEM_INDEX, position);
-                editItemIntent.putExtra(EditItemActivity.PARAM_ITEM_VALUE, items.get(position));
-                startActivityForResult(editItemIntent, REQUEST_CODE_EDIT_ITEM);
+                showEditDialog(position, items.get(position));
             }
         });
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if(requestCode == REQUEST_CODE_EDIT_ITEM && resultCode == RESULT_OK){
-            items.set(data.getIntExtra(EditItemActivity.PARAM_ITEM_INDEX, 0), data.getStringExtra(EditItemActivity.PARAM_ITEM_VALUE));
-            itemsAdapter.notifyDataSetChanged();
-            writeItems();
-        }
-        super.onActivityResult(requestCode, resultCode, data);
     }
 
     @Override
@@ -93,30 +79,34 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void onAddItem(View view){
-        EditText etNewItem = (EditText)findViewById(R.id.etNewItem);
-        itemsAdapter.add(etNewItem.getText().toString());
-        etNewItem.setText("");
-        writeItems();
+        showEditDialog(-1, null);
     }
+
 
     private void readItems(){
-        File fileDir = getFilesDir();
-        File todoFile = new File(fileDir, "todo.txt");
-        try{
-            items = new ArrayList<>(FileUtils.readLines(todoFile));
-        }catch (IOException e){
-            items = new ArrayList<>();
-        }
+        items = new Select().from(TodoItem.class).execute();
     }
 
-    private void writeItems(){
-        File fileDir = getFilesDir();
-        File todoFile = new File(fileDir, "todo.txt");
-        try{
-            FileUtils.writeLines(todoFile, items);
-        }catch (IOException e){
-            e.printStackTrace();
-        }
+    private void showEditDialog(int position, TodoItem todoItem) {
+        FragmentManager fm = getSupportFragmentManager();
+        EditItemDialog editItemDialog = EditItemDialog.newInstance(position, todoItem);
+        editItemDialog.show(fm, "edit_item");
     }
 
+    @Override
+    public void save(int position, TodoItem todoItem) {
+        if(position == -1){
+            items.add(todoItem);
+            itemsAdapter.notifyDataSetChanged();
+            todoItem.save();
+        }else{
+            TodoItem item = items.get(position);
+            item.setDueDate(todoItem.getDueDate());
+            item.setPriority(todoItem.getPriority());
+            item.setName(todoItem.getName());
+            item.setTodoNote(todoItem.getTodoNote());
+            itemsAdapter.notifyDataSetChanged();
+            item.save();
+        }
+    }
 }

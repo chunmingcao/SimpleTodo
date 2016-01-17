@@ -2,13 +2,18 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.grand.simpletodo">
 
-    <application
+    <application android:name="com.activeandroid.app.Application"
         android:allowBackup="true"
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
         android:theme="@style/AppTheme">
+        <meta-data android:name="AA_DB_NAME" android:value="Todo.db" />
+        <meta-data android:name="AA_DB_VERSION" android:value="3" />
+        <meta-data
+            android:name="AA_MODELS"
+            android:value="com.grand.simpletodo.TodoItem" />
         <activity
-            android:name=".MainActivity"
+            android:name=".activities.MainActivity"
             android:label="@string/app_name">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -16,11 +21,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity
-            android:name=".EditItemActivity"
-            android:label="@string/title_activity_edit_item">
 
-        </activity>
     </application>
 
 </manifest>

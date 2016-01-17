@@ -17,6 +17,15 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+    compileOptions {
+        targetCompatibility 1.7
+        sourceCompatibility 1.7
+    }
+}
+
+repositories {
+    jcenter()
+    maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
 }
 
 dependencies {
@@ -24,4 +33,5 @@ dependencies {
     compile 'com.android.support:appcompat-v7:23.1.1'
     compile 'commons-io:commons-io:2.4'
     compile 'com.android.support:design:23.1.1'
+    compile 'com.michaelpardo:activeandroid:3.1.0-SNAPSHOT'
 }
